@@ -1,3 +1,3 @@
 #[warn(clippy::all, clippy::nursery)]
 mod text_input;
-pub use text_input::TextInputValidateion;
+pub use text_input::Input;

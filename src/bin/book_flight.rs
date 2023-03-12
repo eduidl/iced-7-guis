@@ -1,11 +1,10 @@
 use chrono::{Local, NaiveDate};
 use iced::{
-    theme::TextInput,
     widget::{button, column as col, pick_list, text, text_input},
     window::{self, Position},
     Element, Length, Sandbox, Settings,
 };
-use iced_7_guis::TextInputValidateion;
+use iced_7_guis::Input;
 use regex::Regex;
 
 const DATE_FORMAT: &str = "%d.%m.%Y";
@@ -71,8 +70,8 @@ impl Book {
 
 struct FlightBooker {
     flight_type: Option<FlightType>,
-    from: String,
-    to: String,
+    from: Input,
+    to: Input,
     booked: Option<Book>,
 }
 
@@ -88,11 +87,8 @@ impl Sandbox for FlightBooker {
     }
 
     fn view(&self) -> Element<Self::Message> {
-        let from_valid = validate_date_str(&self.from);
-        let to_valid = validate_date_str(&self.to);
-
         let mut button = button("Book").width(Length::Fill);
-        if self.flight_type.is_some() && from_valid && to_valid {
+        if self.flight_type.is_some() && self.from.is_valid() && self.to.is_valid() {
             button = button.on_press(Message::ButtonPressed);
         };
 
@@ -103,11 +99,8 @@ impl Sandbox for FlightBooker {
                 Message::FlightTypeSelected
             )
             .width(Length::Fill),
-            text_input("", &self.from, Message::FromTextInput).style(TextInput::Custom(Box::new(
-                TextInputValidateion(from_valid)
-            ))),
-            text_input("", &self.to, Message::ToTextInput)
-                .style(TextInput::Custom(Box::new(TextInputValidateion(to_valid)))),
+            text_input("", self.from.as_str(), Message::FromTextInput).style(self.from.style()),
+            text_input("", self.to.as_str(), Message::ToTextInput).style(self.to.style()),
             button
         ]
         .spacing(10)
@@ -128,16 +121,16 @@ impl Sandbox for FlightBooker {
                 self.flight_type = Some(v);
             }
             FromTextInput(v) => {
-                self.from = v;
+                self.from = Input::new(v, validate_date_str);
             }
             ToTextInput(v) => {
-                self.to = v;
+                self.to = Input::new(v, validate_date_str);
             }
             ButtonPressed => {
                 self.booked = Some(Book {
                     flight_type: self.flight_type.unwrap(),
-                    from: self.from.clone(),
-                    to: self.to.clone(),
+                    from: self.from.unwrap_valid().to_string(),
+                    to: self.to.unwrap_valid().to_string(),
                 });
             }
         }
@@ -151,8 +144,8 @@ impl Default for FlightBooker {
 
         Self {
             flight_type: Some(FlightType::default()),
-            from: date_str.clone(),
-            to: date_str,
+            from: Input::Valid(date_str.clone()),
+            to: Input::Valid(date_str),
             booked: None,
         }
     }
