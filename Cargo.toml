@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4"
-iced = "0.8"
+iced = { version = "0.8", features = ["smol"] }
 regex = "1.7"
