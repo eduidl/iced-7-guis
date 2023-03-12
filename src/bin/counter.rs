@@ -24,7 +24,7 @@ impl Sandbox for Counter {
         String::from("Counter")
     }
 
-    fn view(&self) -> Element<Increment> {
+    fn view(&self) -> Element<Self::Message> {
         row![
             text(self.value)
                 .size(30)
@@ -37,7 +37,7 @@ impl Sandbox for Counter {
         .into()
     }
 
-    fn update(&mut self, _: Increment) {
+    fn update(&mut self, _: Self::Message) {
         self.value += 1;
     }
 }
